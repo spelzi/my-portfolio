@@ -1,0 +1,275 @@
+.post-page {
+  padding-top: var(--nav-h);
+  background: var(--cream);
+  min-height: 100vh;
+}
+
+/* ─── "Post not found" state ─── */
+.post-not-found {
+  min-height: 100vh;
+  background: var(--cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.post-not-found h2 {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+/* ─── Hero ─── */
+.post-hero {
+  background: var(--dark);
+  padding: 72px 0 60px;
+}
+
+.post-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 40px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.post-back-link:hover {
+  color: var(--gold);
+}
+
+.post-hero-content {
+  max-width: 720px;
+}
+
+.post-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Category pill colours — same palette as Blog.css, kept in sync via categorySlug() */
+.post-hero-cat {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+}
+
+.post-hero-cat.cat-trading {
+  background: #faeeda;
+  color: #854f0b;
+}
+.post-hero-cat.cat-web-dev {
+  background: #e6f1fb;
+  color: #185fa5;
+}
+.post-hero-cat.cat-business {
+  background: #eaf3de;
+  color: #3b6d11;
+}
+
+.post-hero-date,
+.post-hero-readtime {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.post-hero-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(32px, 4.5vw, 56px);
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 24px;
+}
+
+.post-hero-excerpt {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.8;
+  max-width: 600px;
+}
+
+.post-author-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.post-author-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark);
+  flex-shrink: 0;
+}
+
+.post-author-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--white);
+  margin-bottom: 1px;
+}
+
+.post-author-fullname {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Article body ─── */
+.post-body-section {
+  background: var(--white);
+  padding: 64px 0 80px;
+  border-bottom: 1px solid var(--border);
+}
+
+.post-body-content {
+  font-size: 16px;
+  line-height: 1.9;
+  color: var(--text);
+}
+
+.post-body-content p {
+  margin-bottom: 1.6rem;
+}
+
+.post-body-content h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text);
+  margin-top: 2.8rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.post-body-content blockquote {
+  margin: 2rem 0;
+  padding: 20px 28px;
+  border-left: 3px solid var(--gold);
+  background: var(--cream);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.post-body-content ul {
+  padding-left: 0;
+  margin: 1.2rem 0 1.6rem;
+  list-style: none;
+}
+
+.post-body-content li {
+  padding: 8px 0 8px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+  color: var(--text);
+  position: relative;
+}
+
+.post-body-content li .bullet {
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-weight: 500;
+}
+
+/* ─── Prev / Next post navigation ─── */
+.post-nav-section {
+  background: var(--cream);
+  padding: 48px 0;
+}
+
+.post-nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.post-nav-card {
+  flex: 1;
+  min-width: 240px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  padding: 24px 28px;
+  text-decoration: none;
+  transition: border-color 0.2s;
+}
+
+.post-nav-card:hover {
+  border-color: var(--gold);
+}
+
+.post-nav-card.next {
+  text-align: right;
+}
+
+.post-nav-card-label {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 10px;
+}
+
+.post-nav-card-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.post-nav-spacer {
+  flex: 1;
+}
+
+.post-nav-all-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  border: 1px solid var(--border);
+  background: var(--white);
+  text-decoration: none;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+  white-space: nowrap;
+}
+
+.post-nav-all-link:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}

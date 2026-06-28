@@ -1,0 +1,146 @@
+.pastwork-page {
+  padding-top: var(--nav-h);
+  background: var(--cream);
+  min-height: 100vh;
+}
+
+.pastwork-section {
+  padding: 80px 0;
+}
+
+.pastwork-section > .section-label {
+  text-align: center;
+}
+
+.pastwork-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-style: italic;
+  font-size: clamp(40px, 5vw, 64px);
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.pastwork-section > .gold-rule {
+  margin-bottom: 3.5rem;
+}
+
+.pastwork-empty {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 60px 0;
+}
+
+/* ─── Project row ─── */
+.pastwork-row {
+  border-bottom: 1px solid var(--border);
+  padding: 48px 0;
+}
+
+.pastwork-row.first {
+  border-top: 1px solid var(--border);
+}
+
+.pastwork-index {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 40px;
+  color: var(--border);
+  font-weight: 300;
+  padding-top: 4px;
+  display: block;
+}
+
+.pastwork-main {
+  padding-left: 32px;
+}
+
+.pastwork-category {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.pastwork-project-title {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.pastwork-desc {
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 20px;
+  max-width: 520px;
+}
+
+.pastwork-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pastwork-stack-tag {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--white);
+}
+
+/* ─── Status + link column ─── */
+.pastwork-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 8px;
+  height: 100%;
+}
+
+.pastwork-status {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  margin-bottom: auto;
+}
+
+.pastwork-status.status-live {
+  background: #eaf3de;
+  color: #3b6d11;
+}
+.pastwork-status.status-in-progress {
+  background: var(--gold-pale);
+  color: #854f0b;
+}
+.pastwork-status.status-coming-soon {
+  background: var(--cream-deep);
+  color: var(--text-muted);
+}
+.pastwork-status.status-archived {
+  background: #f0e6f6;
+  color: #6b3fa0;
+}
+
+.pastwork-link-btn {
+  margin-top: 24px;
+}
+
+.pastwork-btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+.pastwork-link-btn {
+  margin-top: 0;
+}
