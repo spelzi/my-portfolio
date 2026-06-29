@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Route, Routes, useLocation } from "react-router-dom";
+import { Route, Routes, useLocation, Link } from "react-router-dom";
 import "./App.css";
 import AboutMe from "./Component/AboutMe";
 import AdminPanel from "./Component/Admin/AdminPanel";
@@ -45,7 +45,6 @@ function useRouteLoading(pathname) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setFadingOut(false);
-
     setLoading(true);
 
     const delay = isFirstMount.current ? 650 : 450;
@@ -122,6 +121,30 @@ function App() {
           element={
             <SiteLayout>
               <BlogVideo />
+            </SiteLayout>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <SiteLayout>
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "4rem",
+                  height: "100vh",
+                  alignItems: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  color: "#fff",
+                }}
+              >
+                <h2>404 — Page not found</h2>
+                <Link to="/" className="btn-lux">
+                  ← Go Home
+                </Link>
+              </div>
             </SiteLayout>
           }
         />
