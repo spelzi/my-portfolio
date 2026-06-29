@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Col, Container, Row } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import Anima from "./Anima";
 import Contact from "./Contact";
 import profileImg from "./image/EC0543FF-F3DB-4B6A-9AC7-2E3E97D524AB.PNG";
@@ -35,12 +36,12 @@ function Home() {
                   business strategy.
                 </p>
                 <div className="hero-ctas">
-                  <a href="/pastwork" className="btn-lux-solid">
+                  <Link to="/pastwork" className="btn-lux-solid">
                     View My Work
-                  </a>
-                  <a href="/aboutme" className="btn-lux">
+                  </Link>
+                  <Link to="/aboutme" className="btn-lux">
                     About Me
-                  </a>
+                  </Link>
                 </div>
               </div>
             </Col>
@@ -131,7 +132,6 @@ function Home() {
                   {[
                     ["Name", "Uzor Emmanuel Chidiebube"],
                     ["Email", "emmanueluzor1808@gmail.com"],
-                    ["Tell", "+2347084627195"],
                     ["City", "Ikeja, Lagos"],
                     ["Country", "Nigeria"],
                   ].map(([key, val]) => (
