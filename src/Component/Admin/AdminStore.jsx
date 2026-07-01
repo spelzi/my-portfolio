@@ -1,7 +1,10 @@
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 const SESSION_KEY = "stm_admin_token";
 
+const hasStorage = typeof localStorage !== "undefined";
+
 const read = (key, fallback) => {
+  if (!hasStorage) return fallback; // SSR/prerender — no browser storage, use defaults
   try {
     const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
@@ -12,6 +15,7 @@ const read = (key, fallback) => {
 };
 
 const write = (key, data) => {
+  if (!hasStorage) return; // no-op during SSR/prerender
   try {
     localStorage.setItem(key, JSON.stringify(data));
   } catch (e) {
