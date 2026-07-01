@@ -5,7 +5,7 @@ import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 
 export default [
-  { ignores: ["dist", "node_modules"] },
+  { ignores: ["dist", "dist-ssr", "node_modules", "coverage"] },
   js.configs.recommended,
   {
     files: ["**/*.{js,jsx}"],
@@ -37,6 +37,26 @@ export default [
       "react/no-unescaped-entities": "off",
       "no-unused-vars": "warn",
       "no-empty": "warn",
+    },
+  },
+  {
+    // Test files run under Node (Vitest), not the browser — they need
+    // `global`, plus Vitest's own globals on top of the browser set above.
+    files: ["tests/**/*.{js,jsx}"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.vitest,
+      },
+    },
+  },
+  {
+    // Build/utility scripts (prerender.mjs, sitemap.mjs, etc.) are
+    // pure Node — they use console, process, __dirname, etc.
+    files: ["scripts/**/*.{js,mjs,cjs}"],
+    languageOptions: {
+      globals: globals.node,
     },
   },
 ];

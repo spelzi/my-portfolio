@@ -6,20 +6,21 @@ const AdminLogin = ({ onSuccess }) => {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
-    setLoading(true);
 
-    setTimeout(() => {
-      if (AdminStore.login(pwd)) {
-        setError(false);
-        onSuccess();
-      } else {
-        setError(true);
-        setLoading(false);
-      }
-    }, 400);
+    setLoading(true);
+    setError(false);
+
+    const ok = await AdminStore.login(pwd);
+
+    if (ok) {
+      onSuccess();
+    } else {
+      setError(true);
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,7 +28,6 @@ const AdminLogin = ({ onSuccess }) => {
       <div className="adm-login-box">
         <h1>St Manuel</h1>
         <p>Admin Panel · Sign in to continue</p>
-
         <form onSubmit={handleSubmit}>
           <div className="adm-field adm-login-field">
             <label className="adm-label">Password</label>

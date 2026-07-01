@@ -1,6 +1,40 @@
+#Document
+src/Component/Documents
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Dependencies
 node_modules
+
+# Production
 dist
+build
+
+# Coverage
+coverage
+
+# Environment
 .env
-.vscode
+.env.*
+!.env.example
+
+# macOS
 .DS_Store
-src/Component/Documents/
+
+# Windows
+Thumbs.db
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+
+# JetBrains
+.idea
+
+# Cache
+.cache
+# SSR bundle (build artefact, not for version control)
+dist-ssr

@@ -1,13 +1,6 @@
-const ADMIN_PWD = import.meta.env.VITE_ADMIN_PASSWORD;
-if (!ADMIN_PWD) throw new Error("[AdminStore] VITE_ADMIN_PASSWORD is not set.");
-const SESSION_KEY = "stm_admin_session";
-const KEYS = {
-  posts: "stm_blog_posts",
-  projects: "stm_projects",
-  videos: "stm_videos",
-};
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+const SESSION_KEY = "stm_admin_token";
 
-// FIX 1: read() was missing entirely — restored and using `fallback` param
 const read = (key, fallback) => {
   try {
     const raw = localStorage.getItem(key);
@@ -18,7 +11,6 @@ const read = (key, fallback) => {
   }
 };
 
-// FIX 2: empty catch{} replaced with actual error logging
 const write = (key, data) => {
   try {
     localStorage.setItem(key, JSON.stringify(data));
@@ -27,15 +19,46 @@ const write = (key, data) => {
   }
 };
 
+const KEYS = {
+  posts: "stm_blog_posts",
+  projects: "stm_projects",
+  videos: "stm_videos",
+};
+
 export const AdminStore = {
   /* ─── Auth ─── */
-  login: (pwd) => {
-    const ok = pwd === ADMIN_PWD;
-    if (ok) sessionStorage.setItem(SESSION_KEY, "1");
-    return ok;
+  login: async (pwd) => {
+    try {
+      const res = await fetch(`${API_URL}/api/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pwd }),
+      });
+      if (!res.ok) return false;
+      const { token } = await res.json();
+      sessionStorage.setItem(SESSION_KEY, token);
+      return true;
+    } catch (e) {
+      console.error("[AdminStore] Login failed:", e);
+      return false;
+    }
   },
+
   logout: () => sessionStorage.removeItem(SESSION_KEY),
-  isAuthed: () => sessionStorage.getItem(SESSION_KEY) === "1",
+
+  // Checks token exists + hasn't expired (JWT expiry is in the payload)
+  isAuthed: () => {
+    const token = sessionStorage.getItem(SESSION_KEY);
+    if (!token) return false;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
+  },
+
+  getToken: () => sessionStorage.getItem(SESSION_KEY),
 
   /* ─── Blog posts ─── */
   getPosts: (defaults) => read(KEYS.posts, null) ?? defaults,
