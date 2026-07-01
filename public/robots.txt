@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Admin panel is not for public indexing
+Disallow: /admin
+Disallow: /admin/
+
+Sitemap: https://your-domain.com/sitemap.xml

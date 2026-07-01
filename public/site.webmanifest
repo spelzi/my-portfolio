@@ -1,0 +1,21 @@
+{
+  "name": "Emmanuel Chidiebube Uzor | St Manuel",
+  "short_name": "St Manuel",
+  "description": "Full Stack Developer · Crypto & Forex Trader · Business Consultant",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#141414",
+  "theme_color": "#141414",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
