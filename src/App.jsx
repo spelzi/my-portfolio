@@ -10,6 +10,8 @@ import Home from "./Component/Home";
 import MainNav from "./Component/MainNav";
 import PageLoader from "./Component/PageLoader";
 import PastWork from "./Component/PastWork";
+import { notFoundMeta } from "./seo/seoConfig";
+import { useSeo } from "./seo/useSeo";
 // ---------------------------- App Styling import ------------------------------------------------
 import "./Component/Styling/AboutMe.css";
 import "./Component/Styling/AdminStyle.css";
@@ -35,6 +37,31 @@ const SiteLayout = ({ children }) => (
   </>
 );
 
+const NotFoundPage = () => {
+  const location = useLocation();
+  useSeo(notFoundMeta(location.pathname));
+
+  return (
+    <div
+      style={{
+        textAlign: "center",
+        padding: "4rem",
+        height: "100vh",
+        alignItems: "center",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        color: "#fff",
+      }}
+    >
+      <h2>404 — Page not found</h2>
+      <Link to="/" className="btn-lux">
+        ← Go Home
+      </Link>
+    </div>
+  );
+};
+
 const FADE_MS = 300;
 
 function useRouteLoading(pathname) {
@@ -58,8 +85,6 @@ function useRouteLoading(pathname) {
       clearTimeout(fadeTimer);
       clearTimeout(hideTimer);
     };
-    // FIX 2: removed stale exhaustive-deps disable comment — rule passes
-    // cleanly now that react-hooks plugin is properly configured
   }, [pathname]);
 
   return { loading, fadingOut };
@@ -128,23 +153,7 @@ function App() {
           path="*"
           element={
             <SiteLayout>
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "4rem",
-                  height: "100vh",
-                  alignItems: "center",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  color: "#fff",
-                }}
-              >
-                <h2>404 — Page not found</h2>
-                <Link to="/" className="btn-lux">
-                  ← Go Home
-                </Link>
-              </div>
+              <NotFoundPage />
             </SiteLayout>
           }
         />
