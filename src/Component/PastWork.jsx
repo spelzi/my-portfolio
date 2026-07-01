@@ -2,12 +2,14 @@ import { useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { defaultProjects } from "./Admin/AdminPastWork";
 import { AdminStore } from "./Admin/AdminStore";
+import { getStaticRouteMeta } from "../seo/seoConfig";
+import { useSeo } from "../seo/useSeo";
 
-const statusSlug = (status) =>
-  (status || "").toLowerCase().replace(/\s+/g, "-");
+const statusSlug = (status) => (status || "").toLowerCase().replace(/\s+/g, "-");
 
 const PastWork = () => {
   const [projects] = useState(() => AdminStore.getProjects(defaultProjects));
+  useSeo(getStaticRouteMeta("/pastwork"));
 
   return (
     <div className="pastwork-page" id="top">
@@ -25,15 +27,10 @@ const PastWork = () => {
                   .map((s) => s.trim())
                   .filter(Boolean);
             return (
-              <div
-                key={p.id}
-                className={`pastwork-row${i === 0 ? " first" : ""}`}
-              >
+              <div key={p.id} className={`pastwork-row${i === 0 ? " first" : ""}`}>
                 <Row className="align-items-start">
                   <Col md={1}>
-                    <span className="pastwork-index">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
+                    <span className="pastwork-index">{String(i + 1).padStart(2, "0")}</span>
                   </Col>
                   <Col md={7} className="pastwork-main">
                     <p className="pastwork-category">{p.category}</p>
@@ -48,18 +45,14 @@ const PastWork = () => {
                     </div>
                   </Col>
                   <Col md={4} className="pastwork-side">
-                    <span
-                      className={`pastwork-status status-${statusSlug(p.status)}`}
-                    >
+                    <span className={`pastwork-status status-${statusSlug(p.status)}`}>
                       {p.status}
                     </span>
                     <div className="pastwork-btn-group">
                       {p.link && (
                         <a
                           href={p.link}
-                          target={
-                            p.link.startsWith("http") ? "_blank" : undefined
-                          }
+                          target={p.link.startsWith("http") ? "_blank" : undefined}
                           rel="noopener noreferrer"
                           className="btn-lux pastwork-link-btn"
                         >
@@ -69,9 +62,7 @@ const PastWork = () => {
                       {p.link1 && (
                         <a
                           href={p.link1}
-                          target={
-                            p.link1.startsWith("http") ? "_blank" : undefined
-                          }
+                          target={p.link1.startsWith("http") ? "_blank" : undefined}
                           rel="noopener noreferrer"
                           className="btn-lux pastwork-link-btn"
                         >
@@ -84,9 +75,7 @@ const PastWork = () => {
               </div>
             );
           })}
-          {!projects.length && (
-            <p className="pastwork-empty">No projects added yet.</p>
-          )}
+          {!projects.length && <p className="pastwork-empty">No projects added yet.</p>}
         </Container>
       </section>
     </div>

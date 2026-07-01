@@ -3,9 +3,12 @@ import { Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { AdminStore } from "./Admin/AdminStore";
 import { categorySlug, posts as defaultPosts } from "./postsData";
+import { getStaticRouteMeta } from "../seo/seoConfig";
+import { useSeo } from "../seo/useSeo";
 
 const Blog = () => {
   const [posts] = useState(() => AdminStore.getPosts(defaultPosts));
+  useSeo(getStaticRouteMeta("/blog"));
 
   return (
     <div className="blog-page" id="top">
@@ -17,16 +20,11 @@ const Blog = () => {
           <Row>
             {posts.map((post) => (
               <Col lg={4} md={6} key={post.slug} className="blog-card-col">
-                <Link
-                  to={`/blog/${post.slug}`}
-                  className="blog-post-card-read-link"
-                >
+                <Link to={`/blog/${post.slug}`} className="blog-post-card-read-link">
                   <div className="blog-post-card">
                     <div className="blog-post-card-body">
                       <div className="blog-post-card-meta">
-                        <span
-                          className={`blog-post-card-cat cat-${categorySlug(post.category)}`}
-                        >
+                        <span className={`blog-post-card-cat cat-${categorySlug(post.category)}`}>
                           {post.category}
                         </span>
                         <span className="blog-post-card-date">{post.date}</span>

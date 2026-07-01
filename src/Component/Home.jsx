@@ -4,8 +4,12 @@ import { Link } from "react-router-dom";
 import Anima from "./Anima";
 import Contact from "./Contact";
 import profileImg from "./image/EC0543FF-F3DB-4B6A-9AC7-2E3E97D524AB.PNG";
+import { getStaticRouteMeta, personJsonLd } from "../seo/seoConfig";
+import { useSeo } from "../seo/useSeo";
 
 function Home() {
+  useSeo(getStaticRouteMeta("/"), [personJsonLd()]);
+
   return (
     <>
       {/* ─── Hero ─── */}
@@ -31,9 +35,8 @@ function Home() {
                   Business Consultant
                 </p>
                 <p className="hero-desc">
-                  Building digital solutions and navigating financial markets
-                  with 7+ years of experience across technology, trading, and
-                  business strategy.
+                  Building digital solutions and navigating financial markets with 7+ years of
+                  experience across technology, trading, and business strategy.
                 </p>
                 <div className="hero-ctas">
                   <Link to="/pastwork" className="btn-lux-solid">
@@ -82,35 +85,28 @@ function Home() {
                     </p>
                   </div>
                   <div className="exp-card">
-                    <i
-                      className="fa-solid fa-graduation-cap"
-                      aria-hidden="true"
-                    ></i>
+                    <i className="fa-solid fa-graduation-cap" aria-hidden="true"></i>
                     <h5>Education</h5>
                     <ol>
-                      <li>
-                        National Diploma in Steel Fabrication Engineering
-                        Technology
-                      </li>
+                      <li>National Diploma in Steel Fabrication Engineering Technology</li>
                       <li>Diploma in Full Stack Web Development</li>
                     </ol>
                   </div>
                 </div>
 
                 <p>
-                  A proficient cryptocurrency trader with over 5 years of deep
-                  experience, with comprehensive understanding of both
-                  decentralised and centralised exchanges, mastered use of
-                  blockchain technology, and expertise in spot and derivative
-                  trading, DeFi, and Degen strategies. My journey also includes
-                  educating others through a dedicated Telegram channel and
-                  creating engaging trading content for social media.
+                  A proficient cryptocurrency trader with over 5 years of deep experience, with
+                  comprehensive understanding of both decentralised and centralised exchanges,
+                  mastered use of blockchain technology, and expertise in spot and derivative
+                  trading, DeFi, and Degen strategies. My journey also includes educating others
+                  through a dedicated Telegram channel and creating engaging trading content for
+                  social media.
                 </p>
                 <p>
-                  Additionally, holding a diploma in Full Stack Development with
-                  a focus on frontend, I possess hands-on experience in creating
-                  innovative tech solutions — coupled with robust knowledge in
-                  social media marketing, business consulting, and IT.
+                  Additionally, holding a diploma in Full Stack Development with a focus on
+                  frontend, I possess hands-on experience in creating innovative tech solutions —
+                  coupled with robust knowledge in social media marketing, business consulting, and
+                  IT.
                 </p>
                 <a href="/aboutme" className="btn-lux">
                   Full Profile →
@@ -122,11 +118,7 @@ function Home() {
 
             <Col lg={4}>
               <div className="profile-sidebar">
-                <img
-                  src={profileImg}
-                  alt="Uzor Emmanuel Chidiebube"
-                  className="profile-img"
-                />
+                <img src={profileImg} alt="Uzor Emmanuel Chidiebube" className="profile-img" />
 
                 <div className="profile-details">
                   {[
@@ -173,10 +165,7 @@ function Home() {
                     rel="noopener noreferrer"
                     aria-label="X / Twitter"
                   >
-                    <i
-                      className="fa-brands fa-x-twitter"
-                      aria-hidden="true"
-                    ></i>
+                    <i className="fa-brands fa-x-twitter" aria-hidden="true"></i>
                   </a>
                 </div>
 

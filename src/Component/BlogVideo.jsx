@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { AdminStore } from "./Admin/AdminStore";
 import { categorySlug, defaultVideos } from "./videosData";
+import { getStaticRouteMeta } from "../seo/seoConfig";
+import { useSeo } from "../seo/useSeo";
 
 /* ─── Individual video card ───
    Hover  → mutes & autoplays a YouTube iframe preview over the thumbnail.
@@ -12,12 +14,8 @@ const VideoCard = ({ video }) => {
   const [thumbError, setThumbError] = useState(false);
 
   const hasId = Boolean(video.youtubeId);
-  const thumbUrl = hasId
-    ? `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg`
-    : null;
-  const watchUrl = hasId
-    ? `https://www.youtube.com/watch?v=${video.youtubeId}`
-    : null;
+  const thumbUrl = hasId ? `https://img.youtube.com/vi/${video.youtubeId}/hqdefault.jpg` : null;
+  const watchUrl = hasId ? `https://www.youtube.com/watch?v=${video.youtubeId}` : null;
   const embedUrl = hasId
     ? `https://www.youtube.com/embed/${video.youtubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${video.youtubeId}&rel=0&modestbranding=1`
     : null;
@@ -52,16 +50,12 @@ const VideoCard = ({ video }) => {
             className={`video-card-thumb${hovered ? " is-hidden" : ""}`}
           />
         ) : (
-          <div
-            className={`video-card-placeholder${hovered ? " is-hidden" : ""}`}
-          >
+          <div className={`video-card-placeholder${hovered ? " is-hidden" : ""}`}>
             <i className="fa-brands fa-youtube" aria-hidden="true" />
           </div>
         )}
 
-        <div
-          className={`video-card-play-overlay${hovered ? " is-hidden" : ""}`}
-        >
+        <div className={`video-card-play-overlay${hovered ? " is-hidden" : ""}`}>
           <div className="video-card-play-btn">
             <i className="fa-solid fa-play" aria-hidden="true" />
           </div>
@@ -77,16 +71,12 @@ const VideoCard = ({ video }) => {
           />
         )}
 
-        {!hasId && (
-          <div className="video-card-no-id-badge">Add video ID in Admin</div>
-        )}
+        {!hasId && <div className="video-card-no-id-badge">Add video ID in Admin</div>}
       </div>
 
       <div className="video-card-body">
         <div className="video-card-meta">
-          <span
-            className={`video-card-cat cat-${categorySlug(video.category)}`}
-          >
+          <span className={`video-card-cat cat-${categorySlug(video.category)}`}>
             {video.category}
           </span>
           <span className="video-card-date">{video.date}</span>
@@ -118,6 +108,7 @@ const VideoCard = ({ video }) => {
 /* ─── Page ─── */
 const BlogVideo = () => {
   const [videos] = useState(() => AdminStore.getVideos(defaultVideos));
+  useSeo(getStaticRouteMeta("/blogvideo"));
 
   return (
     <div className="video-page" id="top">
@@ -125,9 +116,7 @@ const BlogVideo = () => {
         <Container>
           <p className="section-label">Video Content</p>
           <h1 className="video-page-title">Watch &amp; Learn</h1>
-          <p className="video-page-subtitle">
-            Hover to preview · Click to watch on YouTube
-          </p>
+          <p className="video-page-subtitle">Hover to preview · Click to watch on YouTube</p>
           <div className="gold-rule" />
 
           <Row>

@@ -3,6 +3,8 @@ import { Col, Container, Row } from "react-bootstrap";
 import { Link, useParams } from "react-router-dom";
 import { AdminStore } from "./Admin/AdminStore";
 import { categorySlug, posts as defaultPosts } from "./postsData";
+import { getBlogPostMeta, notFoundMeta, blogPostingJsonLd } from "../seo/seoConfig";
+import { useSeo } from "../seo/useSeo";
 
 const BlogPost = () => {
   const { slug } = useParams();
@@ -11,6 +13,12 @@ const BlogPost = () => {
 
   const index = posts.findIndex((p) => p.slug === slug);
   const post = posts[index];
+
+  // Hooks must run unconditionally — compute meta for either state.
+  useSeo(
+    post ? getBlogPostMeta(post) : notFoundMeta(`/blog/${slug || ""}`),
+    post ? [blogPostingJsonLd(post)] : []
+  );
 
   // Scroll to top whenever navigating between posts (prev/next/direct link)
   useEffect(() => {
@@ -43,9 +51,7 @@ const BlogPost = () => {
           </Link>
           <div className="post-hero-content">
             <div className="post-hero-meta">
-              <span
-                className={`post-hero-cat cat-${categorySlug(post.category)}`}
-              >
+              <span className={`post-hero-cat cat-${categorySlug(post.category)}`}>
                 {post.category}
               </span>
               <span className="post-hero-date">{post.date}</span>
@@ -111,10 +117,7 @@ const BlogPost = () => {
               All Posts
             </Link>
             {nextPost ? (
-              <Link
-                to={`/blog/${nextPost.slug}`}
-                className="post-nav-card next"
-              >
+              <Link to={`/blog/${nextPost.slug}`} className="post-nav-card next">
                 <span className="post-nav-card-label">Next →</span>
                 <span className="post-nav-card-title">{nextPost.title}</span>
               </Link>
