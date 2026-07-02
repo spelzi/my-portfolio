@@ -8,6 +8,7 @@ const links = [
   { href: "/pastwork", label: "Work" },
   { href: "/blog", label: "Blog" },
   { href: "/blogvideo", label: "Videos" },
+  { href: "/admin", label: "Admin" },
 ];
 
 const MainNav = () => {
@@ -60,11 +61,7 @@ const MainNav = () => {
   return (
     <nav className="navbars1" role="navigation" aria-label="Main navigation">
       <div className="navbar11">
-        <Link
-          to="/"
-          aria-label="St Manuel — home"
-          onClick={() => setOpen(false)}
-        >
+        <Link to="/" aria-label="St Manuel — home" onClick={() => setOpen(false)}>
           <img src={img} alt="St Manuel logo" className="logo-img" />
         </Link>
         <button
@@ -98,13 +95,7 @@ const MainNav = () => {
           ))}
         </div>
         {/* Backdrop — dims page content behind the open mobile menu */}
-        {open && (
-          <div
-            className="nav-backdrop"
-            onClick={() => setOpen(false)}
-            aria-hidden="true"
-          />
-        )}
+        {open && <div className="nav-backdrop" onClick={() => setOpen(false)} aria-hidden="true" />}
       </div>
     </nav>
   );
