@@ -55,7 +55,7 @@ describe("Home", () => {
 
   it("renders the profile sidebar contact details", () => {
     renderHome();
-    expect(screen.getByText("emmanueluzor1808@gmail.com")).toBeInTheDocument();
+    expect(screen.getByText("uzorchidiebube19@gmail.com")).toBeInTheDocument();
     expect(screen.getByText("Ikeja, Lagos")).toBeInTheDocument();
     expect(screen.getByText("Nigeria")).toBeInTheDocument();
   });
