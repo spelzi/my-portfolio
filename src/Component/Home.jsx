@@ -123,7 +123,7 @@ function Home() {
                 <div className="profile-details">
                   {[
                     ["Name", "Uzor Emmanuel Chidiebube"],
-                    ["Email", "emmanueluzor1808@gmail.com"],
+                    ["Email", "uzorchidiebube19@gmail.com"],
                     ["City", "Ikeja, Lagos"],
                     ["Country", "Nigeria"],
                   ].map(([key, val]) => (
