@@ -31,8 +31,7 @@ const Contact = () => {
     const errs = {};
     if (!from_name.trim()) errs.from_name = "Name is required.";
     if (!from_email.trim()) errs.from_email = "Email is required.";
-    else if (!validateEmail(from_email))
-      errs.from_email = "Please enter a valid email.";
+    else if (!validateEmail(from_email)) errs.from_email = "Please enter a valid email.";
     if (!message.trim()) errs.message = "Message is required.";
     return errs;
   };
@@ -84,8 +83,7 @@ const Contact = () => {
         setModal({
           show: true,
           title: "Error",
-          message:
-            "Request timed out. Please check your connection and try again.",
+          message: "Request timed out. Please check your connection and try again.",
           type: "danger",
         });
       } else {
@@ -101,8 +99,7 @@ const Contact = () => {
     }
   };
 
-  const closeModal = () =>
-    setModal({ show: false, title: "", message: "", type: "" });
+  const closeModal = () => setModal({ show: false, title: "", message: "", type: "" });
 
   return (
     <>
@@ -129,9 +126,7 @@ const Contact = () => {
             onChange={handleChange}
             disabled={loading}
           />
-          {errors.from_email && (
-            <p className="form-error">{errors.from_email}</p>
-          )}
+          {errors.from_email && <p className="form-error">{errors.from_email}</p>}
         </div>
         <div>
           <textarea
@@ -151,18 +146,14 @@ const Contact = () => {
           className={`form-btn btn-loading${loading ? " is-loading" : ""}`}
           disabled={loading}
         >
-          <span className="btn-loading-label">
-            {loading ? "Sending..." : "Send Message"}
-          </span>
+          <span className="btn-loading-label">{loading ? "Sending..." : "Send Message"}</span>
           <span className="btn-spinner" aria-hidden="true" />
         </button>
       </form>
 
       <Modal show={modal.show} onHide={closeModal} centered>
         <Modal.Header closeButton className="contact-modal-header">
-          <Modal.Title className="contact-modal-title">
-            {modal.title}
-          </Modal.Title>
+          <Modal.Title className="contact-modal-title">{modal.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body className="contact-modal-body">{modal.message}</Modal.Body>
         <Modal.Footer className="contact-modal-footer">
