@@ -36,8 +36,18 @@
   padding: 0;
 }
 
+html {
+  background-color: #0e0e0e;
+  min-height: -webkit-fill-available;
+  /* Prevent page from scrolling under the PageLoader on iOS Safari */
+  overscroll-behavior: none;
+}
+
 body {
   background: var(--dark);
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overscroll-behavior: none;
 }
 
 h1,
