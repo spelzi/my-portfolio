@@ -345,13 +345,14 @@
 }
 
 /* ─── Page loader ───  */
-/* ─── Page loader ───  */
 .page-loader {
   position: fixed;
   inset: 0;
+
   min-height: 100vh;
   min-height: -webkit-fill-available;
   min-height: 100dvh;
+  min-height: var(--app-height, 100dvh);
   z-index: 99999;
   background: var(--dark);
   display: flex;
