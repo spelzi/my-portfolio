@@ -1,32 +1,49 @@
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 const SESSION_KEY = "stm_admin_token";
 
-const hasStorage = typeof localStorage !== "undefined";
-
-const read = (key, fallback) => {
-  if (!hasStorage) return fallback; // SSR/prerender — no browser storage, use defaults
+/**
+ * Content (posts/projects/videos) is now backed by the Supabase-powered
+ * Express API, not localStorage — so admin edits are visible to every
+ * visitor, not just the device that made them.
+ *
+ * getX(defaults) never throws: on any network failure it logs and falls
+ * back to `defaults`, so the site degrades gracefully instead of breaking
+ * if the backend is ever briefly unreachable.
+ *
+ * saveX(data) DOES throw on failure (unlike the old localStorage version,
+ * which never failed) — callers must handle that, since a network save can
+ * genuinely fail in ways a local write never could.
+ */
+const getCollection = async (path, defaults) => {
   try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
+    const res = await fetch(`${API_URL}${path}`);
+    if (!res.ok) throw new Error(`Request failed (${res.status})`);
+    return await res.json();
   } catch (e) {
-    console.error(`[AdminStore] Failed to read "${key}":`, e);
-    return fallback;
+    console.error(`[AdminStore] Failed to load ${path}:`, e);
+    return defaults;
   }
 };
 
-const write = (key, data) => {
-  if (!hasStorage) return; // no-op during SSR/prerender
-  try {
-    localStorage.setItem(key, JSON.stringify(data));
-  } catch (e) {
-    console.error(`[AdminStore] Failed to write "${key}":`, e);
-  }
-};
+const saveCollection = async (path, data) => {
+  const token = sessionStorage.getItem(SESSION_KEY);
+  if (!token) throw new Error("Not signed in.");
 
-const KEYS = {
-  posts: "stm_blog_posts",
-  projects: "stm_projects",
-  videos: "stm_videos",
+  const res = await fetch(`${API_URL}${path}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Save failed (${res.status})`);
+  }
+
+  return true;
 };
 
 export const AdminStore = {
@@ -65,14 +82,14 @@ export const AdminStore = {
   getToken: () => sessionStorage.getItem(SESSION_KEY),
 
   /* ─── Blog posts ─── */
-  getPosts: (defaults) => read(KEYS.posts, null) ?? defaults,
-  savePosts: (data) => write(KEYS.posts, data),
+  getPosts: (defaults) => getCollection("/api/posts", defaults),
+  savePosts: (data) => saveCollection("/api/posts", data),
 
   /* ─── Projects ─── */
-  getProjects: (defaults) => read(KEYS.projects, null) ?? defaults,
-  saveProjects: (data) => write(KEYS.projects, data),
+  getProjects: (defaults) => getCollection("/api/projects", defaults),
+  saveProjects: (data) => saveCollection("/api/projects", data),
 
   /* ─── Videos ─── */
-  getVideos: (defaults) => read(KEYS.videos, null) ?? defaults,
-  saveVideos: (data) => write(KEYS.videos, data),
+  getVideos: (defaults) => getCollection("/api/videos", defaults),
+  saveVideos: (data) => saveCollection("/api/videos", data),
 };

@@ -1,31 +1,33 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "../test-utils";
+import { render, screen, fireEvent, waitFor } from "../test-utils";
 import AdminVideos from "../../src/Component/Admin/AdminVideos";
 import { AdminStore } from "../../src/Component/Admin/AdminStore";
 
 vi.mock("../../src/Component/Admin/AdminStore", () => ({
   AdminStore: {
-    getVideos: vi.fn(() => []),
+    getVideos: vi.fn(),
     saveVideos: vi.fn(),
   },
 }));
 
+const waitForLoad = () =>
+  waitFor(() => expect(screen.queryByText("Loading…")).not.toBeInTheDocument());
+
 describe("AdminVideos", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    AdminStore.getVideos.mockReturnValue([]); // undo any mockReturnValue() left by a prior test
+    AdminStore.getVideos.mockResolvedValue([]);
+    AdminStore.saveVideos.mockResolvedValue(true);
     vi.spyOn(window, "alert").mockImplementation(() => {});
   });
 
-  it("shows empty state when there are no videos", () => {
+  it("shows empty state when there are no videos", async () => {
     render(<AdminVideos />);
-    expect(
-      screen.getByText('No videos yet — click "+ Add Video"'),
-    ).toBeInTheDocument();
+    expect(await screen.findByText('No videos yet — click "+ Add Video"')).toBeInTheDocument();
   });
 
-  it("lists existing videos with their category", () => {
-    AdminStore.getVideos.mockReturnValue([
+  it("lists existing videos with their category", async () => {
+    AdminStore.getVideos.mockResolvedValue([
       {
         id: "v1",
         youtubeId: "abc123",
@@ -36,21 +38,29 @@ describe("AdminVideos", () => {
       },
     ]);
     render(<AdminVideos />);
-    expect(screen.getByText("My Video")).toBeInTheDocument();
+    expect(await screen.findByText("My Video")).toBeInTheDocument();
     expect(screen.getByText("abc123")).toBeInTheDocument();
   });
 
-  it("shows 'No video ID set' when youtubeId is missing", () => {
-    AdminStore.getVideos.mockReturnValue([
-      { id: "v1", youtubeId: "", title: "No ID Video", category: "Business", description: "", date: "" },
+  it("shows 'No video ID set' when youtubeId is missing", async () => {
+    AdminStore.getVideos.mockResolvedValue([
+      {
+        id: "v1",
+        youtubeId: "",
+        title: "No ID Video",
+        category: "Business",
+        description: "",
+        date: "",
+      },
     ]);
     render(<AdminVideos />);
-    expect(screen.getByText("No video ID set")).toBeInTheDocument();
+    expect(await screen.findByText("No video ID set")).toBeInTheDocument();
   });
 
   describe("adding a video", () => {
-    it("requires a title before saving", () => {
+    it("requires a title before saving", async () => {
       render(<AdminVideos />);
+      await waitForLoad();
       fireEvent.click(screen.getByText("+ Add Video"));
       fireEvent.click(screen.getByRole("button", { name: "Add Video" }));
 
@@ -58,8 +68,9 @@ describe("AdminVideos", () => {
       expect(AdminStore.saveVideos).not.toHaveBeenCalled();
     });
 
-    it("saves the youtubeId, title, category, and date together", () => {
+    it("saves the youtubeId, title, category, and date together", async () => {
       render(<AdminVideos />);
+      await waitForLoad();
       fireEvent.click(screen.getByText("+ Add Video"));
 
       fireEvent.change(screen.getByPlaceholderText("e.g. dQw4w9WgXcQ"), {
@@ -70,13 +81,15 @@ describe("AdminVideos", () => {
       });
       fireEvent.click(screen.getByRole("button", { name: "Add Video" }));
 
+      await waitFor(() => expect(AdminStore.saveVideos).toHaveBeenCalled());
       const saved = AdminStore.saveVideos.mock.calls[0][0][0];
       expect(saved.youtubeId).toBe("newVideoId1");
       expect(saved.title).toBe("New Video");
     });
 
-    it("shows a thumbnail preview once a youtubeId is entered", () => {
+    it("shows a thumbnail preview once a youtubeId is entered", async () => {
       render(<AdminVideos />);
+      await waitForLoad();
       fireEvent.click(screen.getByText("+ Add Video"));
 
       fireEvent.change(screen.getByPlaceholderText("e.g. dQw4w9WgXcQ"), {
@@ -84,23 +97,29 @@ describe("AdminVideos", () => {
       });
 
       const preview = document.querySelector(".adm-video-id-preview img");
-      expect(preview).toHaveAttribute(
-        "src",
-        "https://img.youtube.com/vi/previewId/mqdefault.jpg",
-      );
+      expect(preview).toHaveAttribute("src", "https://img.youtube.com/vi/previewId/mqdefault.jpg");
     });
 
-    it("appends new videos to the end of the list", () => {
-      AdminStore.getVideos.mockReturnValue([
-        { id: "v1", youtubeId: "", title: "First", category: "Business", description: "", date: "" },
+    it("appends new videos to the end of the list", async () => {
+      AdminStore.getVideos.mockResolvedValue([
+        {
+          id: "v1",
+          youtubeId: "",
+          title: "First",
+          category: "Business",
+          description: "",
+          date: "",
+        },
       ]);
       render(<AdminVideos />);
+      await screen.findByText("First");
       fireEvent.click(screen.getByText("+ Add Video"));
       fireEvent.change(screen.getByPlaceholderText("Video title"), {
         target: { value: "Second" },
       });
       fireEvent.click(screen.getByRole("button", { name: "Add Video" }));
 
+      await waitFor(() => expect(AdminStore.saveVideos).toHaveBeenCalled());
       const saved = AdminStore.saveVideos.mock.calls[0][0];
       expect(saved[0].title).toBe("First");
       expect(saved[1].title).toBe("Second");
@@ -109,27 +128,35 @@ describe("AdminVideos", () => {
 
   describe("editing a video", () => {
     beforeEach(() => {
-      AdminStore.getVideos.mockReturnValue([
-        { id: "v1", youtubeId: "old123", title: "Old Title", category: "Business", description: "", date: "" },
+      AdminStore.getVideos.mockResolvedValue([
+        {
+          id: "v1",
+          youtubeId: "old123",
+          title: "Old Title",
+          category: "Business",
+          description: "",
+          date: "",
+        },
       ]);
     });
 
-    it("pre-fills the form with existing data", () => {
+    it("pre-fills the form with existing data", async () => {
       render(<AdminVideos />);
+      await screen.findByText("Old Title");
       fireEvent.click(screen.getByText("Edit"));
-      expect(screen.getByPlaceholderText("Video title")).toHaveValue(
-        "Old Title",
-      );
+      expect(screen.getByPlaceholderText("Video title")).toHaveValue("Old Title");
     });
 
-    it("updates in place without duplicating", () => {
+    it("updates in place without duplicating", async () => {
       render(<AdminVideos />);
+      await screen.findByText("Old Title");
       fireEvent.click(screen.getByText("Edit"));
       fireEvent.change(screen.getByPlaceholderText("Video title"), {
         target: { value: "Updated Title" },
       });
       fireEvent.click(screen.getByText("Save Changes"));
 
+      await waitFor(() => expect(AdminStore.saveVideos).toHaveBeenCalled());
       const saved = AdminStore.saveVideos.mock.calls[0][0];
       expect(saved).toHaveLength(1);
       expect(saved[0].title).toBe("Updated Title");
@@ -138,23 +165,32 @@ describe("AdminVideos", () => {
 
   describe("deleting a video", () => {
     beforeEach(() => {
-      AdminStore.getVideos.mockReturnValue([
-        { id: "v1", youtubeId: "", title: "Delete Me", category: "Business", description: "", date: "" },
+      AdminStore.getVideos.mockResolvedValue([
+        {
+          id: "v1",
+          youtubeId: "",
+          title: "Delete Me",
+          category: "Business",
+          description: "",
+          date: "",
+        },
       ]);
     });
 
-    it("shows a confirmation prompt before removing", () => {
+    it("shows a confirmation prompt before removing", async () => {
       render(<AdminVideos />);
+      await screen.findByText("Delete Me");
       fireEvent.click(screen.getByText("Delete"));
       expect(screen.getByText("Remove this video?")).toBeInTheDocument();
     });
 
-    it("removes the video on confirm", () => {
+    it("removes the video on confirm", async () => {
       render(<AdminVideos />);
+      await screen.findByText("Delete Me");
       fireEvent.click(screen.getByText("Delete"));
       fireEvent.click(screen.getByText("Remove"));
 
-      expect(AdminStore.saveVideos).toHaveBeenCalledWith([]);
+      await waitFor(() => expect(AdminStore.saveVideos).toHaveBeenCalledWith([]));
     });
   });
 });

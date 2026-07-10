@@ -2,10 +2,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "../test-utils";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import BlogPost from "../../src/Component/BlogPost";
+import { AdminStore } from "../../src/Component/Admin/AdminStore";
 
 vi.mock("../../src/Component/Admin/AdminStore", () => ({
   AdminStore: {
-    getPosts: vi.fn((defaults) => defaults),
+    getPosts: vi.fn((defaults) => Promise.resolve(defaults)),
   },
 }));
 
@@ -20,111 +21,131 @@ const renderPost = (slug) =>
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/blog" element={<div>Blog List</div>} />
       </Routes>
-    </MemoryRouter>,
+    </MemoryRouter>
   );
 
 describe("BlogPost", () => {
   describe("valid post", () => {
     const SLUG = "understanding-smart-money-concepts-forex";
 
-    it("renders the post title", () => {
+    // Every test here uses `await screen.findByText(...)` for its first
+    // assertion. The post is actually already present from the very first
+    // render (it's in the local `defaultPosts` fallback), but findByText
+    // also waits for the mocked getPosts() promise to resolve — without
+    // that, React warns about a state update happening after the test has
+    // already finished asserting and torn down.
+
+    it("renders the post title", async () => {
       renderPost(SLUG);
       expect(
-        screen.getByText("Understanding Smart Money Concepts in Forex"),
+        await screen.findByText("Understanding Smart Money Concepts in Forex")
       ).toBeInTheDocument();
     });
 
-    it("renders category and date metadata", () => {
+    it("renders category and date metadata", async () => {
       renderPost(SLUG);
-      expect(screen.getByText("Trading")).toBeInTheDocument();
+      expect(await screen.findByText("Trading")).toBeInTheDocument();
       expect(screen.getByText("Mar 2025")).toBeInTheDocument();
       expect(screen.getByText("· 8 min read")).toBeInTheDocument();
     });
 
-    it("renders author info", () => {
+    it("renders author info", async () => {
       renderPost(SLUG);
-      expect(screen.getByText("St Manuel")).toBeInTheDocument();
+      expect(await screen.findByText("St Manuel")).toBeInTheDocument();
       expect(screen.getByText("Uzor Emmanuel Chidiebube")).toBeInTheDocument();
     });
 
-    it("renders the post excerpt", () => {
+    it("renders the post excerpt", async () => {
       renderPost(SLUG);
       expect(
-        screen.getByText(/how institutional traders move markets/i),
+        await screen.findByText(/how institutional traders move markets/i)
       ).toBeInTheDocument();
     });
 
-    it("renders paragraph content blocks", () => {
+    it("renders paragraph content blocks", async () => {
       renderPost(SLUG);
       expect(
-        screen.getByText(/Smart Money Concepts \(SMC\) is a framework/i),
+        await screen.findByText(/Smart Money Concepts \(SMC\) is a framework/i)
       ).toBeInTheDocument();
     });
 
-    it("renders section headings (h2 blocks)", () => {
+    it("renders section headings (h2 blocks)", async () => {
       renderPost(SLUG);
-      expect(screen.getByText("What is 'Smart Money'?")).toBeInTheDocument();
+      expect(await screen.findByText("What is 'Smart Money'?")).toBeInTheDocument();
       expect(screen.getByText("Order Blocks")).toBeInTheDocument();
     });
 
-    it("renders blockquote blocks", () => {
+    it("renders blockquote blocks", async () => {
       renderPost(SLUG);
       expect(
-        screen.getByText(/Stop-loss hunts are not random volatility/i),
+        await screen.findByText(/Stop-loss hunts are not random volatility/i)
       ).toBeInTheDocument();
     });
 
-    it("renders bullet list items", () => {
+    it("renders bullet list items", async () => {
       renderPost(SLUG);
-      expect(
-        screen.getByText(/Bullish order block:/i),
-      ).toBeInTheDocument();
+      expect(await screen.findByText(/Bullish order block:/i)).toBeInTheDocument();
     });
 
-    it("renders a back link to /blog", () => {
+    it("renders a back link to /blog", async () => {
       renderPost(SLUG);
-      const backLink = screen.getByText("← Journal");
+      const backLink = await screen.findByText("← Journal");
       expect(backLink.closest("a")).toHaveAttribute("href", "/blog");
     });
 
-    it("scrolls to top on mount", () => {
+    it("scrolls to top on mount", async () => {
       renderPost(SLUG);
+      await screen.findByText("← Journal"); // let the async load settle
       expect(window.scrollTo).toHaveBeenCalledWith(0, 0);
     });
 
-    it("shows Next → navigation for the first post (has next, no prev)", () => {
+    it("shows Next → navigation for the first post (has next, no prev)", async () => {
       renderPost(SLUG); // index 0 — no previous
-      expect(screen.getByText("Next →")).toBeInTheDocument();
+      expect(await screen.findByText("Next →")).toBeInTheDocument();
       expect(screen.queryByText("← Previous")).not.toBeInTheDocument();
     });
 
-    it("shows ← Previous navigation for the last post", () => {
+    it("shows ← Previous navigation for the last post", async () => {
       renderPost("building-crypto-trading-community-telegram"); // last post
-      expect(screen.getByText("← Previous")).toBeInTheDocument();
+      expect(await screen.findByText("← Previous")).toBeInTheDocument();
       expect(screen.queryByText("Next →")).not.toBeInTheDocument();
     });
 
-    it("shows both Prev and Next for a middle post", () => {
+    it("shows both Prev and Next for a middle post", async () => {
       renderPost("digital-strategy-entrepreneurs-2025"); // index 2 of 6
-      expect(screen.getByText("← Previous")).toBeInTheDocument();
+      expect(await screen.findByText("← Previous")).toBeInTheDocument();
       expect(screen.getByText("Next →")).toBeInTheDocument();
     });
 
-    it("renders an All Posts link", () => {
+    it("renders an All Posts link", async () => {
       renderPost(SLUG);
-      expect(screen.getByText("All Posts")).toBeInTheDocument();
+      expect(await screen.findByText("All Posts")).toBeInTheDocument();
     });
   });
 
   describe("invalid slug", () => {
-    it("shows a 404 message for an unknown slug", () => {
-      renderPost("this-slug-does-not-exist");
-      expect(screen.getByText("Post not found")).toBeInTheDocument();
+    it("does not show 'not found' before the live fetch resolves", () => {
+      // A promise that never resolves during this test — simulates the
+      // window between mount and the fetch completing.
+      AdminStore.getPosts.mockReturnValueOnce(new Promise(() => {}));
+
+      renderPost("a-brand-new-post-not-in-defaults");
+      expect(screen.queryByText("Post not found")).not.toBeInTheDocument();
     });
 
-    it("shows a back link even on the 404 state", () => {
+    it("shows a 404 message for an unknown slug", async () => {
+      renderPost("this-slug-does-not-exist");
+      // The component intentionally renders nothing on the very first
+      // paint for an unrecognized slug — it only shows "not found" once
+      // the live fetch has confirmed the post truly doesn't exist. This
+      // prevents a false-negative flash for a post published after the
+      // last deploy (not in local defaults, but real in the live data).
+      expect(await screen.findByText("Post not found")).toBeInTheDocument();
+    });
+
+    it("shows a back link even on the 404 state", async () => {
       renderPost("non-existent-post");
-      expect(screen.getByText("← Back to Blog")).toBeInTheDocument();
+      expect(await screen.findByText("← Back to Blog")).toBeInTheDocument();
     });
   });
 });

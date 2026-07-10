@@ -9,10 +9,32 @@ import { useSeo } from "../seo/useSeo";
 const BlogPost = () => {
   const { slug } = useParams();
 
-  const [posts] = useState(() => AdminStore.getPosts(defaultPosts));
+  const [posts, setPosts] = useState(defaultPosts);
+  // Tracks whether the live fetch has resolved at least once. Without this,
+  // a post that exists in Supabase but isn't in the local `defaultPosts`
+  // fallback (e.g. published after the last deploy, shared immediately)
+  // would flash "Post not found" for a moment before the real data loads.
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    AdminStore.getPosts(defaultPosts).then((data) => {
+      if (!cancelled) {
+        setPosts(data);
+        setLoaded(true);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const index = posts.findIndex((p) => p.slug === slug);
   const post = posts[index];
+  // Only trust a "not found" result once the live fetch has actually
+  // returned — on the very first render we've only got local defaults,
+  // which may not include a post published since the last deploy.
+  const notFound = loaded && !post;
 
   // Hooks must run unconditionally — compute meta for either state.
   useSeo(
@@ -25,7 +47,7 @@ const BlogPost = () => {
     window.scrollTo(0, 0);
   }, [slug]);
 
-  if (!post) {
+  if (notFound) {
     return (
       <div className="post-not-found">
         <div>
@@ -37,6 +59,10 @@ const BlogPost = () => {
       </div>
     );
   }
+
+  // Not found yet, but the fetch also hasn't resolved yet — render nothing
+  // rather than a false negative. Resolves within one network round-trip.
+  if (!post) return null;
 
   const prevPost = index > 0 ? posts[index - 1] : null;
   const nextPost = index < posts.length - 1 ? posts[index + 1] : null;

@@ -21,7 +21,7 @@ const AdminDashboard = ({ counts, goTo }) => {
   ];
 
   const tips = [
-    "All changes save instantly to this browser. They won't sync to other devices yet.",
+    "Changes here go live for every visitor as soon as you save — no rebuild or redeploy needed.",
     "Use the Blog tab to write posts with headings (##), quotes (>), and bullet lists (-).",
     'Paste a YouTube video ID in the Videos tab — copy it from the URL after "?v=".',
     "Click any certificate on the About page to view it full-size with the new lightbox.",
@@ -30,21 +30,12 @@ const AdminDashboard = ({ counts, goTo }) => {
   return (
     <div>
       <h1 className="adm-page-title">Dashboard</h1>
-      <p className="adm-page-sub">
-        Welcome back. Here's an overview of your content.
-      </p>
+      <p className="adm-page-sub">Welcome back. Here's an overview of your content.</p>
 
       <div className="adm-stats">
         {cards.map((c) => (
-          <div
-            key={c.label}
-            className="adm-stat is-clickable"
-            onClick={() => goTo(c.tab)}
-          >
-            <i
-              className={`fa-solid ${c.icon} adm-stat-icon`}
-              aria-hidden="true"
-            />
+          <div key={c.label} className="adm-stat is-clickable" onClick={() => goTo(c.tab)}>
+            <i className={`fa-solid ${c.icon} adm-stat-icon`} aria-hidden="true" />
             <div className="adm-stat-num">{c.value}</div>
             <div className="adm-stat-label">{c.label}</div>
           </div>

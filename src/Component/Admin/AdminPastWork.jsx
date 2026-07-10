@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoadingButton from "../LoadingButton";
 import { AdminStore } from "./AdminStore";
 
@@ -58,17 +58,38 @@ const statusTone = (s) =>
   })[s] ?? "soon";
 
 const AdminPastWork = ({ onCountChange }) => {
-  const [projects, setProjects] = useState(() =>
-    AdminStore.getProjects(defaultProjects),
-  );
+  const [projects, setProjects] = useState(defaultProjects);
+  const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
   const [delId, setDelId] = useState(null);
   const [form, setForm] = useState(emptyProject);
 
-  const save = (updated) => {
+  useEffect(() => {
+    let cancelled = false;
+    AdminStore.getProjects(defaultProjects).then((data) => {
+      if (!cancelled) {
+        setProjects(data);
+        setLoading(false);
+        onCountChange?.(data.length);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const save = async (updated) => {
+    const previous = projects;
     setProjects(updated);
-    AdminStore.saveProjects(updated);
-    onCountChange?.(updated.length);
+    try {
+      await AdminStore.saveProjects(updated);
+      onCountChange?.(updated.length);
+    } catch (err) {
+      setProjects(previous);
+      alert(`Failed to save: ${err.message}`);
+      throw err;
+    }
   };
 
   const openAdd = () => {
@@ -88,7 +109,7 @@ const AdminPastWork = ({ onCountChange }) => {
     setModal({ mode: "edit", id: p.id });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.title.trim()) return alert("Title is required.");
 
     const project = {
@@ -104,17 +125,24 @@ const AdminPastWork = ({ onCountChange }) => {
         ? [...projects, project]
         : projects.map((p) => (p.id === modal.id ? project : p));
 
-    save(updated);
-    setModal(null);
+    try {
+      await save(updated);
+      setModal(null);
+    } catch {
+      // error already alerted inside save() — keep the modal open to retry
+    }
   };
 
-  const handleDelete = () => {
-    save(projects.filter((p) => p.id !== delId));
-    setDelId(null);
+  const handleDelete = async () => {
+    try {
+      await save(projects.filter((p) => p.id !== delId));
+      setDelId(null);
+    } catch {
+      // error already alerted inside save()
+    }
   };
 
-  const f = (field) => (e) =>
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  const f = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const stackStr = (s) => (Array.isArray(s) ? s.join(", ") : s);
 
@@ -144,63 +172,69 @@ const AdminPastWork = ({ onCountChange }) => {
             </tr>
           </thead>
           <tbody>
-            {projects.map((p) => {
-              return (
-                <tr key={p.id}>
-                  <td>
-                    <span className="adm-table-row-title">{p.title}</span>
-                    {p.link && (
-                      <>
-                        <br />
-                        <a
-                          href={p.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="adm-table-link"
-                        >
-                          {p.link}
-                        </a>
-                      </>
-                    )}
-                    {p.link1 && (
-                      <>
-                        <br />
-                        <a
-                          href={p.link1}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="adm-table-link"
-                        >
-                          {p.link1}
-                        </a>
-                      </>
-                    )}
-                  </td>
-                  <td className="adm-cell-sm">{p.category}</td>
-                  <td className="adm-cell-stack">{stackStr(p.stack)}</td>
-                  <td>
-                    <span className={`adm-badge tone-${statusTone(p.status)}`}>
-                      {p.status}
-                    </span>
-                  </td>
-                  <td className="align-right no-wrap">
-                    <LoadingButton
-                      className="adm-btn adm-btn-outline adm-btn-sm adm-btn-gap"
-                      onClick={() => openEdit(p)}
-                    >
-                      Edit
-                    </LoadingButton>
-                    <LoadingButton
-                      className="adm-btn adm-btn-danger adm-btn-sm"
-                      onClick={() => setDelId(p.id)}
-                    >
-                      Delete
-                    </LoadingButton>
-                  </td>
-                </tr>
-              );
-            })}
-            {!projects.length && (
+            {loading && (
+              <tr>
+                <td colSpan={5} className="adm-table-empty">
+                  Loading…
+                </td>
+              </tr>
+            )}
+            {!loading &&
+              projects.map((p) => {
+                return (
+                  <tr key={p.id}>
+                    <td>
+                      <span className="adm-table-row-title">{p.title}</span>
+                      {p.link && (
+                        <>
+                          <br />
+                          <a
+                            href={p.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="adm-table-link"
+                          >
+                            {p.link}
+                          </a>
+                        </>
+                      )}
+                      {p.link1 && (
+                        <>
+                          <br />
+                          <a
+                            href={p.link1}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="adm-table-link"
+                          >
+                            {p.link1}
+                          </a>
+                        </>
+                      )}
+                    </td>
+                    <td className="adm-cell-sm">{p.category}</td>
+                    <td className="adm-cell-stack">{stackStr(p.stack)}</td>
+                    <td>
+                      <span className={`adm-badge tone-${statusTone(p.status)}`}>{p.status}</span>
+                    </td>
+                    <td className="align-right no-wrap">
+                      <LoadingButton
+                        className="adm-btn adm-btn-outline adm-btn-sm adm-btn-gap"
+                        onClick={() => openEdit(p)}
+                      >
+                        Edit
+                      </LoadingButton>
+                      <LoadingButton
+                        className="adm-btn adm-btn-danger adm-btn-sm"
+                        onClick={() => setDelId(p.id)}
+                      >
+                        Delete
+                      </LoadingButton>
+                    </td>
+                  </tr>
+                );
+              })}
+            {!loading && !projects.length && (
               <tr>
                 <td colSpan={5} className="adm-table-empty">
                   No projects yet
@@ -237,11 +271,7 @@ const AdminPastWork = ({ onCountChange }) => {
               </div>
               <div className="adm-field">
                 <label className="adm-label">Status</label>
-                <select
-                  className="adm-select"
-                  value={form.status}
-                  onChange={f("status")}
-                >
+                <select className="adm-select" value={form.status} onChange={f("status")}>
                   {STATUSES.map((s) => (
                     <option key={s}>{s}</option>
                   ))}
@@ -286,10 +316,7 @@ const AdminPastWork = ({ onCountChange }) => {
             </div>
 
             <div className="adm-modal-foot">
-              <button
-                className="adm-btn adm-btn-outline"
-                onClick={() => setModal(null)}
-              >
+              <button className="adm-btn adm-btn-outline" onClick={() => setModal(null)}>
                 Cancel
               </button>
               <LoadingButton className="adm-btn" onClick={handleSubmit}>
@@ -305,10 +332,7 @@ const AdminPastWork = ({ onCountChange }) => {
           <div className="adm-modal is-narrow">
             <h3>Delete this project?</h3>
             <div className="adm-modal-foot is-centered">
-              <button
-                className="adm-btn adm-btn-outline"
-                onClick={() => setDelId(null)}
-              >
+              <button className="adm-btn adm-btn-outline" onClick={() => setDelId(null)}>
                 Cancel
               </button>
               <LoadingButton

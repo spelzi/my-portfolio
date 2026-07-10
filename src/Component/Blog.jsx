@@ -1,4 +1,4 @@
-import { useState } from "react"; // FIX 1: removed React + unused useEffect
+import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import { AdminStore } from "./Admin/AdminStore";
@@ -7,8 +7,22 @@ import { getStaticRouteMeta } from "../seo/seoConfig";
 import { useSeo } from "../seo/useSeo";
 
 const Blog = () => {
-  const [posts] = useState(() => AdminStore.getPosts(defaultPosts));
+  // Initial state = defaults, so prerendering/first paint always has real
+  // content with zero network dependency. Live data (from Supabase, via
+  // the backend API) swaps in silently once the fetch resolves — this is
+  // what makes admin edits show up for visitors without a rebuild.
+  const [posts, setPosts] = useState(defaultPosts);
   useSeo(getStaticRouteMeta("/blog"));
+
+  useEffect(() => {
+    let cancelled = false;
+    AdminStore.getPosts(defaultPosts).then((data) => {
+      if (!cancelled) setPosts(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="blog-page" id="top">

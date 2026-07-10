@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { defaultProjects } from "./Admin/AdminPastWork";
 import { AdminStore } from "./Admin/AdminStore";
@@ -8,8 +8,18 @@ import { useSeo } from "../seo/useSeo";
 const statusSlug = (status) => (status || "").toLowerCase().replace(/\s+/g, "-");
 
 const PastWork = () => {
-  const [projects] = useState(() => AdminStore.getProjects(defaultProjects));
+  const [projects, setProjects] = useState(defaultProjects);
   useSeo(getStaticRouteMeta("/pastwork"));
+
+  useEffect(() => {
+    let cancelled = false;
+    AdminStore.getProjects(defaultProjects).then((data) => {
+      if (!cancelled) setProjects(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="pastwork-page" id="top">

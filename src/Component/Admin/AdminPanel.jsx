@@ -25,11 +25,16 @@ const AdminPanel = () => {
   const sidebarRef = useRef(null);
   const hamburgerRef = useRef(null);
 
-  const refreshCounts = useCallback(() => {
+  const refreshCounts = useCallback(async () => {
+    const [posts, projects, videos] = await Promise.all([
+      AdminStore.getPosts(defaultPosts),
+      AdminStore.getProjects(defaultProjects),
+      AdminStore.getVideos(defaultVideos),
+    ]);
     setCounts({
-      posts: AdminStore.getPosts(defaultPosts).length,
-      projects: AdminStore.getProjects(defaultProjects).length,
-      videos: AdminStore.getVideos(defaultVideos).length,
+      posts: posts.length,
+      projects: projects.length,
+      videos: videos.length,
     });
   }, []);
 
@@ -143,23 +148,15 @@ const AdminPanel = () => {
       </aside>
 
       <main className="adm-main">
-        {tab === "dashboard" && (
-          <AdminDashboard counts={counts} goTo={setTab} />
-        )}
+        {tab === "dashboard" && <AdminDashboard counts={counts} goTo={setTab} />}
         {tab === "blog" && (
-          <AdminBlog
-            onCountChange={(n) => setCounts((c) => ({ ...c, posts: n }))}
-          />
+          <AdminBlog onCountChange={(n) => setCounts((c) => ({ ...c, posts: n }))} />
         )}
         {tab === "pastwork" && (
-          <AdminPastWork
-            onCountChange={(n) => setCounts((c) => ({ ...c, projects: n }))}
-          />
+          <AdminPastWork onCountChange={(n) => setCounts((c) => ({ ...c, projects: n }))} />
         )}
         {tab === "videos" && (
-          <AdminVideos
-            onCountChange={(n) => setCounts((c) => ({ ...c, videos: n }))}
-          />
+          <AdminVideos onCountChange={(n) => setCounts((c) => ({ ...c, videos: n }))} />
         )}
       </main>
     </div>
