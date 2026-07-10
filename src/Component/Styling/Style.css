@@ -348,7 +348,6 @@
 .page-loader {
   position: fixed;
   inset: 0;
-
   min-height: 100vh;
   min-height: -webkit-fill-available;
   min-height: 100dvh;
@@ -362,6 +361,7 @@
   gap: 22px;
   opacity: 1;
   transition: opacity 0.3s ease;
+  touch-action: none;
 }
 .page-loader.is-fading {
   opacity: 0;
