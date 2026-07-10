@@ -6,7 +6,7 @@ import Blog from "../../src/Component/Blog";
 // Let AdminStore return the real default posts (no localStorage in tests)
 vi.mock("../../src/Component/Admin/AdminStore", () => ({
   AdminStore: {
-    getPosts: vi.fn((defaults) => defaults),
+    getPosts: vi.fn((defaults) => Promise.resolve(defaults)),
   },
 }));
 

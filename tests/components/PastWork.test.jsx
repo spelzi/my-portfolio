@@ -6,7 +6,7 @@ import { AdminStore } from "../../src/Component/Admin/AdminStore";
 
 vi.mock("../../src/Component/Admin/AdminStore", () => ({
   AdminStore: {
-    getProjects: vi.fn((defaults) => defaults),
+    getProjects: vi.fn((defaults) => Promise.resolve(defaults)),
   },
 }));
 
@@ -72,14 +72,17 @@ describe("PastWork", () => {
     expect(viewLinks.length).toBeGreaterThan(0);
   });
 
-  it("shows empty state when no projects exist", () => {
-    AdminStore.getProjects.mockReturnValueOnce([]);
+  it("shows empty state when no projects exist", async () => {
+    AdminStore.getProjects.mockResolvedValueOnce([]);
 
     render(
       <MemoryRouter>
         <PastWork />
       </MemoryRouter>,
     );
-    expect(screen.getByText("No projects added yet.")).toBeInTheDocument();
+    // The component renders defaultProjects first, then swaps to the
+    // resolved (empty) list once the mocked fetch resolves — findByText
+    // waits for that update instead of asserting on the first paint.
+    expect(await screen.findByText("No projects added yet.")).toBeInTheDocument();
   });
 });

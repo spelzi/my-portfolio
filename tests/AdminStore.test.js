@@ -23,50 +23,175 @@ describe("AdminStore", () => {
   });
 
   // ─── Blog Posts ─────────────────────────────────────────────────────────
-  describe("getPosts / savePosts", () => {
-    it("returns defaults when nothing is stored", () => {
-      const defaults = [{ slug: "a", title: "A" }];
-      expect(AdminStore.getPosts(defaults)).toEqual(defaults);
+  // getPosts/getProjects/getVideos and savePosts/saveProjects/saveVideos all
+  // share the exact same fetch-based implementation under the hood — see
+  // getCollection/saveCollection in AdminStore.jsx — so these three describe
+  // blocks intentionally mirror each other.
+  describe("getPosts", () => {
+    it("returns live data from the API on success", async () => {
+      const live = [{ slug: "live-post", title: "Live" }];
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => live,
+      });
+
+      const defaults = [{ slug: "default-post", title: "Default" }];
+      const result = await AdminStore.getPosts(defaults);
+
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/api/posts`);
+      expect(result).toEqual(live);
     });
 
-    it("returns saved posts and ignores defaults", () => {
-      const saved = [{ slug: "b", title: "B" }];
-      AdminStore.savePosts(saved);
-      expect(AdminStore.getPosts([{ slug: "default" }])).toEqual(saved);
+    it("falls back to defaults when the response is not ok", async () => {
+      global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 500 });
+      const defaults = [{ slug: "fallback", title: "Fallback" }];
+
+      const result = await AdminStore.getPosts(defaults);
+      expect(result).toEqual(defaults);
     });
 
-    it("handles corrupted localStorage data gracefully", () => {
-      localStorage.setItem("stm_blog_posts", "NOT_JSON{{{{");
-      const defaults = [{ slug: "fallback" }];
-      expect(AdminStore.getPosts(defaults)).toEqual(defaults);
+    it("falls back to defaults on a network error", async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error("Network down"));
+      const defaults = [{ slug: "fallback", title: "Fallback" }];
+
+      const result = await AdminStore.getPosts(defaults);
+      expect(result).toEqual(defaults);
+    });
+  });
+
+  describe("savePosts", () => {
+    it("throws when not signed in (no token)", async () => {
+      await expect(AdminStore.savePosts([])).rejects.toThrow("Not signed in.");
+    });
+
+    it("PUTs to /api/posts with the Bearer token and JSON body", async () => {
+      sessionStorage.setItem(TOKEN_KEY, "test-token");
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true, count: 1 }),
+      });
+
+      const posts = [{ slug: "a", title: "A" }];
+      await AdminStore.savePosts(posts);
+
+      expect(fetch).toHaveBeenCalledWith(
+        `${API_URL}/api/posts`,
+        expect.objectContaining({
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer test-token",
+          },
+          body: JSON.stringify(posts),
+        })
+      );
+    });
+
+    it("returns true on success", async () => {
+      sessionStorage.setItem(TOKEN_KEY, "test-token");
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ success: true }),
+      });
+
+      const result = await AdminStore.savePosts([]);
+      expect(result).toBe(true);
+    });
+
+    it("throws with the server's error message on failure", async () => {
+      sessionStorage.setItem(TOKEN_KEY, "test-token");
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: async () => ({ error: "Item 0: slug is required" }),
+      });
+
+      await expect(AdminStore.savePosts([{}])).rejects.toThrow("Item 0: slug is required");
+    });
+
+    it("throws a generic message if the error response has no body", async () => {
+      sessionStorage.setItem(TOKEN_KEY, "test-token");
+      global.fetch = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        json: async () => {
+          throw new Error("not json");
+        },
+      });
+
+      await expect(AdminStore.savePosts([])).rejects.toThrow("Save failed (500)");
     });
   });
 
   // ─── Projects ────────────────────────────────────────────────────────────
-  describe("getProjects / saveProjects", () => {
-    it("returns defaults when nothing is stored", () => {
-      const defaults = [{ id: "p1", title: "P" }];
-      expect(AdminStore.getProjects(defaults)).toEqual(defaults);
+  describe("getProjects", () => {
+    it("returns live data from the API on success", async () => {
+      const live = [{ id: "p1", title: "Live Project" }];
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => live });
+
+      const result = await AdminStore.getProjects([]);
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/api/projects`);
+      expect(result).toEqual(live);
     });
 
-    it("returns saved projects", () => {
-      const saved = [{ id: "p2", title: "Saved" }];
-      AdminStore.saveProjects(saved);
-      expect(AdminStore.getProjects([])).toEqual(saved);
+    it("falls back to defaults on failure", async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error("down"));
+      const defaults = [{ id: "fallback", title: "Fallback" }];
+      expect(await AdminStore.getProjects(defaults)).toEqual(defaults);
+    });
+  });
+
+  describe("saveProjects", () => {
+    it("PUTs to /api/projects with the Bearer token", async () => {
+      sessionStorage.setItem(TOKEN_KEY, "test-token");
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+
+      await AdminStore.saveProjects([{ id: "p1", title: "P" }]);
+
+      expect(fetch).toHaveBeenCalledWith(
+        `${API_URL}/api/projects`,
+        expect.objectContaining({ method: "PUT" })
+      );
+    });
+
+    it("throws when not signed in", async () => {
+      await expect(AdminStore.saveProjects([])).rejects.toThrow("Not signed in.");
     });
   });
 
   // ─── Videos ──────────────────────────────────────────────────────────────
-  describe("getVideos / saveVideos", () => {
-    it("returns defaults when nothing is stored", () => {
-      const defaults = [{ id: "v1", title: "V" }];
-      expect(AdminStore.getVideos(defaults)).toEqual(defaults);
+  describe("getVideos", () => {
+    it("returns live data from the API on success", async () => {
+      const live = [{ id: "v1", title: "Live Video" }];
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => live });
+
+      const result = await AdminStore.getVideos([]);
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/api/videos`);
+      expect(result).toEqual(live);
     });
 
-    it("returns saved videos", () => {
-      const saved = [{ id: "v2", title: "Saved Video" }];
-      AdminStore.saveVideos(saved);
-      expect(AdminStore.getVideos([])).toEqual(saved);
+    it("falls back to defaults on failure", async () => {
+      global.fetch = vi.fn().mockRejectedValue(new Error("down"));
+      const defaults = [{ id: "fallback", title: "Fallback" }];
+      expect(await AdminStore.getVideos(defaults)).toEqual(defaults);
+    });
+  });
+
+  describe("saveVideos", () => {
+    it("PUTs to /api/videos with the Bearer token", async () => {
+      sessionStorage.setItem(TOKEN_KEY, "test-token");
+      global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+
+      await AdminStore.saveVideos([{ id: "v1", title: "V" }]);
+
+      expect(fetch).toHaveBeenCalledWith(
+        `${API_URL}/api/videos`,
+        expect.objectContaining({ method: "PUT" })
+      );
+    });
+
+    it("throws when not signed in", async () => {
+      await expect(AdminStore.saveVideos([])).rejects.toThrow("Not signed in.");
     });
   });
 
@@ -131,7 +256,7 @@ describe("AdminStore", () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ password: "secret" }),
-        }),
+        })
       );
     });
 
