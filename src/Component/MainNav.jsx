@@ -8,7 +8,6 @@ const links = [
   { href: "/pastwork", label: "Work" },
   { href: "/blog", label: "Blog" },
   { href: "/blogvideo", label: "Videos" },
-  { href: "/admin", label: "Admin" },
 ];
 
 const MainNav = () => {
