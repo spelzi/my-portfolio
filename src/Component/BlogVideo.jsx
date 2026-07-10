@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { AdminStore } from "./Admin/AdminStore";
 import { categorySlug, defaultVideos } from "./videosData";
@@ -107,8 +107,18 @@ const VideoCard = ({ video }) => {
 
 /* ─── Page ─── */
 const BlogVideo = () => {
-  const [videos] = useState(() => AdminStore.getVideos(defaultVideos));
+  const [videos, setVideos] = useState(defaultVideos);
   useSeo(getStaticRouteMeta("/blogvideo"));
+
+  useEffect(() => {
+    let cancelled = false;
+    AdminStore.getVideos(defaultVideos).then((data) => {
+      if (!cancelled) setVideos(data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="video-page" id="top">
